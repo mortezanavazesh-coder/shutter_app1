@@ -1,0 +1,42 @@
+name: Build Flutter APK
+
+on:
+  workflow_dispatch:  # اجرای دستی از طریق دکمه Run workflow
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.3'   # آخرین نسخه stable Flutter
+          channel: 'stable'
+
+      - name: Enable Flutter web and Android
+        run: |
+          flutter config --enable-web
+          flutter config --enable-android
+
+      - name: Get Flutter Dependencies
+        run: flutter pub get
+
+      - name: Clean Project
+        run: flutter clean
+
+      - name: Fix Android Embedding (v2)
+        run: |
+          sed -i 's/^.*FlutterActivity.*$/import io.flutter.embedding.android.FlutterActivity;/' android/app/src/main/java/com/mn110/shutter/MainActivity.java || true
+
+      - name: Build Release APK
+        run: flutter build apk --release
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shutter-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
