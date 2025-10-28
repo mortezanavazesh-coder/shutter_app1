@@ -26,9 +26,11 @@ jobs:
           flutter pub get
 
       - name: Build release APK
-        run: |
-          export PATH="$PATH:$GITHUB_WORKSPACE/flutter/bin"
-          flutter build apk --release --no-shrink
+  run: |
+    flutter clean
+    flutter pub get
+    flutter build apk --release
+
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
